@@ -189,6 +189,24 @@ begin
         assert (data_out = x"0F") report "mem[0] should be 15 but was " & integer'image(to_integer(unsigned(data_out))) severity error;
 
         report "Done";
+        report "Testing size of memory...";
+        report "mem[65535] = 15; assert mem[65535] = 15;";
+
+        read_en <= '0';
+        write_en <= '1';
+
+        address <= x"FFFF";
+        data_in <= x"0F";
+        wait for clock_period;
+
+        read_en <= '1';
+        write_en <= '0';
+
+        address <= x"FFFF";
+        wait for clock_period;
+        assert (data_out = x"0F") report "mem[65535] should be 15 but was " & integer'image(to_integer(unsigned(data_out))) severity error;
+
+        report "Done";
 
         wait;
     end process;
