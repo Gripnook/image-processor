@@ -1,5 +1,6 @@
 -- Implements a controller designed to parse a PGM image file
 -- and output the pixels and metadata to a memory block.
+-- Uses a Mealy type finite state machine.
 
 library ieee;
 use ieee.std_logic_1164.all;
