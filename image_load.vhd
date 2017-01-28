@@ -1,5 +1,7 @@
 -- Implements a datapath/controller digital system designed to parse
 -- a PGM image file and output the pixels and metadata to a memory block.
+-- The inputs are assumed to be connected to a file stream feeding in data
+-- byte by byte and the outputs are assumed to be connected to a memory block.
 
 library ieee;
 use ieee.std_logic_1164.all;
