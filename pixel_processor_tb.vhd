@@ -82,7 +82,8 @@ begin
         pixel_operand <= x"0F";
         operation <= x"1";
         wait for clock_period;
-        assert (data_valid = '0') report "data should be invalid but was valid" severity error;
+        assert (data_out = x"0F") report "output should be 15 but was " & integer'image(to_integer(unsigned(data_out))) severity error;
+        assert (data_valid = '1') report "data should be valid but was not" severity error;
 
         pixel_data <= x"0A";
         pixel_operand <= x"02";
@@ -95,7 +96,8 @@ begin
         pixel_operand <= x"03";
         operation <= x"2";
         wait for clock_period;
-        assert (data_valid = '0') report "data should be invalid but was valid" severity error;
+        assert (data_out = x"00") report "output should be 0 but was " & integer'image(to_integer(unsigned(data_out))) severity error;
+        assert (data_valid = '1') report "data should be valid but was not" severity error;
 
         pixel_data <= x"0A";
         pixel_operand <= x"02";

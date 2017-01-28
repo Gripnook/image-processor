@@ -1,8 +1,8 @@
 -- Implements a basic arithmetic unit synchronized to the clock for
--- pixel processing. The supported operations are
+-- pixel processing. The supported operations are:
 -- 0: set output to pixel_operand
--- 1: add pixel_operand to pixel_data
--- 2: subtract pixel_operand from pixel_data
+-- 1: add pixel_operand to pixel_data, capped at maxval
+-- 2: subtract pixel_operand from pixel_data, capped at 0
 -- 3: perform a bitwise and on pixel_data and pixel_operand
 -- 4: perform a bitwise or on pixel_data and pixel_operand
 -- 5: perform a bitwise xor on pixel_data and pixel_operand
@@ -29,60 +29,66 @@ end pixel_processor;
 
 architecture arch of pixel_processor is
 
-    signal data_out_internal : std_logic_vector(8 downto 0);
+    signal data_out_internal : std_logic_vector(7 downto 0);
 
 begin
     
     data_ready <= enable;
+    data_valid <= '1'; -- not used
 
     output_process : process (clock, reset)
     begin
         if (reset = '1') then
             data_out <= (others => '0');
-            data_valid <= '0';
         elsif (rising_edge(clock)) then
             if (enable = '1') then
-                data_out <= data_out_internal(7 downto 0);
-                if (data_out_internal > "0" & maxval) then
-                    data_valid <= '0';
-                else
-                    data_valid <= not data_out_internal(8);
-                end if;
+                data_out <= data_out_internal;
             end if;
         end if;
     end process;
 
     operation_process : process (operation, pixel_data, pixel_operand, maxval)
+        variable data_out_next : std_logic_vector(8 downto 0);
     begin
         case operation is
         when "0000" =>
-            data_out_internal <= "0" & pixel_operand;
+            data_out_internal <= pixel_operand;
         when "0001" =>
-            data_out_internal <= std_logic_vector(unsigned("0" & pixel_data) + unsigned(pixel_operand));
+            data_out_next := std_logic_vector(unsigned("0" & pixel_data) + unsigned(pixel_operand));
+            if (data_out_next > "0" & maxval) then
+                data_out_internal <= maxval; -- cap addition at maxval
+            else
+                data_out_internal <= data_out_next(7 downto 0);
+            end if;
         when "0010" =>
-            data_out_internal <= std_logic_vector(unsigned("0" & pixel_data) - unsigned(pixel_operand));
+            data_out_next := std_logic_vector(unsigned("0" & pixel_data) - unsigned(pixel_operand));
+            if (data_out_next > "0" & maxval) then
+                data_out_internal <= (others => '0'); -- cap subtraction at 0
+            else
+                data_out_internal <= data_out_next(7 downto 0);
+            end if;
         when "0011" =>
-            data_out_internal <= "0" & (pixel_data and pixel_operand);
+            data_out_internal <= pixel_data and pixel_operand;
         when "0100" =>
-            data_out_internal <= "0" & (pixel_data or pixel_operand);
+            data_out_internal <= pixel_data or pixel_operand;
         when "0101" =>
-            data_out_internal <= "0" & (pixel_data xor pixel_operand);
+            data_out_internal <= pixel_data xor pixel_operand;
         when "0110" =>
-            data_out_internal <= std_logic_vector(unsigned("0" & maxval) - unsigned(pixel_data));
+            data_out_internal <= std_logic_vector(unsigned(maxval) - unsigned(pixel_data));
         when "0111" =>
             if (pixel_data > pixel_operand) then
-                data_out_internal <= "0" & maxval;
+                data_out_internal <= maxval;
             else
-                data_out_internal <= "0" & pixel_data;
+                data_out_internal <= pixel_data;
             end if;
         when "1000" =>
             if (pixel_data > pixel_operand) then
-                data_out_internal <= std_logic_vector(unsigned("0" & pixel_data) - unsigned(pixel_operand));
+                data_out_internal <= std_logic_vector(unsigned(pixel_data) - unsigned(pixel_operand));
             else
-                data_out_internal <= std_logic_vector(unsigned("0" & pixel_operand) - unsigned(pixel_data));
+                data_out_internal <= std_logic_vector(unsigned(pixel_operand) - unsigned(pixel_data));
             end if;
         when others =>
-            data_out_internal <= (8 => '1', others => '0');
+            data_out_internal <= (others => '0');
         end case;
     end process;
 

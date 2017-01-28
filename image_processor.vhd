@@ -2,8 +2,8 @@
 -- 
 -- Supported operations are:
 -- 0: reg_out <- reg_in_1
--- 1: reg_out <- reg_in_0 + reg_in_1
--- 2: reg_out <- reg_in_0 - reg_in_1
+-- 1: reg_out <- reg_in_0 + reg_in_1, capped at MAXVAL
+-- 2: reg_out <- reg_in_0 - reg_in_1, capped at 0
 -- 3: reg_out <- reg_in_0 AND reg_in_1
 -- 4: reg_out <- reg_in_0 OR reg_in_1
 -- 5: reg_out <- reg_in_0 XOR reg_in_1
