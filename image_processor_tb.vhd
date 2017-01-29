@@ -152,14 +152,14 @@ begin
         wait for clock_period;
         wait for clock_period;
 
-        -- reg2 <- reg0 - reg1
+        -- reg2 <- reg0 ndiff reg1
         start <= '1';
         reg_in_0 <= "00";
         reg_in_1 <= "01";
         reg_out <= "10";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "0010";
+        operation <= "1001";
         wait until (done = '1');
         wait for clock_period/2; -- set data on falling edge
         start <= '0';
