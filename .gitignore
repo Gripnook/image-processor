@@ -2,4 +2,13 @@ db/
 incremental_db/
 output_files/
 simulation/
+*.qpf
+*.qws
+*.qsf
+*.bsf
+c5_pin_model_dump.txt
+
 work/
+*.mpf
+*.mti
+*.wlf
