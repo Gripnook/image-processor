@@ -22,7 +22,7 @@ architecture arch of image_load_tb is
               address : out std_logic_vector(15 downto 0); -- memory address to write pixel to
               pixel_data : out std_logic_vector(7 downto 0); -- pixel data to write to memory
               done : out std_logic; -- flag set when finished loading
-              error_code : out error_type); -- error encountered while parsing image file
+              error_code : out std_logic_vector(3 downto 0)); -- error encountered while parsing image file
     end component;
 
     constant clock_period : time := 1 ns;
@@ -40,7 +40,7 @@ architecture arch of image_load_tb is
     signal address : std_logic_vector(15 downto 0);
     signal pixel_data : std_logic_vector(7 downto 0);
     signal done : std_logic;
-    signal error_code : error_type;
+    signal error_code : std_logic_vector(3 downto 0);
 
 begin
 
@@ -100,7 +100,7 @@ begin
         assert (unsigned(img_width) = 48) report "width should be 48 but was " & integer'image(to_integer(unsigned(img_width))) severity error;
         assert (unsigned(img_height) = 36) report "height should be 36 but was " & integer'image(to_integer(unsigned(img_height))) severity error;
         assert (unsigned(maxval) = 255) report "maxval should be 255 but was " & integer'image(to_integer(unsigned(maxval))) severity error;
-        assert (error_code = NONE) report "error code should be NONE but was " & error_type'image(error_code) severity error;
+        assert (error_code = NONE) report "error code should be NONE but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing invalid file type...";
@@ -127,7 +127,7 @@ begin
         file_close(img_file);
         wait until (done = '1');
 
-        assert (error_code = INVALID_FILETYPE) report "error code should be INVALID_FILETYPE but was " & error_type'image(error_code) severity error;
+        assert (error_code = INVALID_FILETYPE) report "error code should be INVALID_FILETYPE but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with width too large...";
@@ -154,7 +154,7 @@ begin
         file_close(img_file);
         wait until (done = '1');
 
-        assert (error_code = WIDTH_TOO_LARGE) report "error code should be WIDTH_TOO_LARGE but was " & error_type'image(error_code) severity error;
+        assert (error_code = WIDTH_TOO_LARGE) report "error code should be WIDTH_TOO_LARGE but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with height too large...";
@@ -182,7 +182,7 @@ begin
         wait until (done = '1');
 
         assert (unsigned(img_width) = 1) report "width should be 1 but was " & integer'image(to_integer(unsigned(img_width))) severity error;
-        assert (error_code = HEIGHT_TOO_LARGE) report "error code should be HEIGHT_TOO_LARGE but was " & error_type'image(error_code) severity error;
+        assert (error_code = HEIGHT_TOO_LARGE) report "error code should be HEIGHT_TOO_LARGE but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with maxval too large...";
@@ -211,7 +211,7 @@ begin
 
         assert (unsigned(img_width) = 4) report "width should be 4 but was " & integer'image(to_integer(unsigned(img_width))) severity error;
         assert (unsigned(img_height) = 2) report "height should be 2 but was " & integer'image(to_integer(unsigned(img_height))) severity error;
-        assert (error_code = MAXVAL_TOO_LARGE) report "error code should be MAXVAL_TOO_LARGE but was " & error_type'image(error_code) severity error;
+        assert (error_code = MAXVAL_TOO_LARGE) report "error code should be MAXVAL_TOO_LARGE but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with pixel too large...";
@@ -241,7 +241,7 @@ begin
         assert (unsigned(img_width) = 4) report "width should be 4 but was " & integer'image(to_integer(unsigned(img_width))) severity error;
         assert (unsigned(img_height) = 2) report "height should be 2 but was " & integer'image(to_integer(unsigned(img_height))) severity error;
         assert (unsigned(maxval) = 255) report "maxval should be 255 but was " & integer'image(to_integer(unsigned(maxval))) severity error;
-        assert (error_code = PIXEL_TOO_LARGE) report "error code should be PIXEL_TOO_LARGE but was " & error_type'image(error_code) severity error;
+        assert (error_code = PIXEL_TOO_LARGE) report "error code should be PIXEL_TOO_LARGE but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with too many pixels...";
@@ -271,7 +271,7 @@ begin
         assert (unsigned(img_width) = 4) report "width should be 4 but was " & integer'image(to_integer(unsigned(img_width))) severity error;
         assert (unsigned(img_height) = 2) report "height should be 2 but was " & integer'image(to_integer(unsigned(img_height))) severity error;
         assert (unsigned(maxval) = 255) report "maxval should be 255 but was " & integer'image(to_integer(unsigned(maxval))) severity error;
-        assert (error_code = TOO_MANY_PIXELS) report "error code should be TOO_MANY_PIXELS but was " & error_type'image(error_code) severity error;
+        assert (error_code = TOO_MANY_PIXELS) report "error code should be TOO_MANY_PIXELS but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with too few pixels...";
@@ -301,7 +301,7 @@ begin
         assert (unsigned(img_width) = 4) report "width should be 4 but was " & integer'image(to_integer(unsigned(img_width))) severity error;
         assert (unsigned(img_height) = 2) report "height should be 2 but was " & integer'image(to_integer(unsigned(img_height))) severity error;
         assert (unsigned(maxval) = 255) report "maxval should be 255 but was " & integer'image(to_integer(unsigned(maxval))) severity error;
-        assert (error_code = TOO_FEW_PIXELS) report "error code should be TOO_FEW_PIXELS but was " & error_type'image(error_code) severity error;
+        assert (error_code = TOO_FEW_PIXELS) report "error code should be TOO_FEW_PIXELS but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
         report "Testing file with invalid token...";
@@ -328,7 +328,7 @@ begin
         file_close(img_file);
         wait until (done = '1');
 
-        assert (error_code = INVALID_TOKEN) report "error code should be INVALID_TOKEN but was " & error_type'image(error_code) severity error;
+        assert (error_code = INVALID_TOKEN) report "error code should be INVALID_TOKEN but was " & integer'image(to_integer(unsigned(error_code))) severity error;
         
         report "Done";
 

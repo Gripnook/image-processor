@@ -24,7 +24,7 @@ entity image_load_controller is
           address_cnt_en : out std_logic; -- increments the address
           pixel_data_clr : out std_logic; -- clear the current pixel
           done : out std_logic; -- flag set when finished loading
-          error_code : out error_type); -- error encountered while parsing image file
+          error_code : out std_logic_vector(3 downto 0)); -- error encountered while parsing image file
 end image_load_controller;
 
 architecture arch of image_load_controller is

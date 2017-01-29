@@ -25,7 +25,7 @@ architecture arch of image_edge_detector_tb is
               write_en_save : out std_logic; -- flags that a byte can be written to file
               data_out_save : out std_logic_vector(7 downto 0); -- byte that can be written to file
               done : out std_logic; -- finished processing
-              error_code : out error_type); -- errors encountered while processing
+              error_code : out std_logic_vector(3 downto 0)); -- errors encountered while processing
     end component;
 
     constant clock_period : time := 1 ns;
@@ -46,7 +46,7 @@ architecture arch of image_edge_detector_tb is
     signal write_en_save : std_logic;
     signal data_out_save : std_logic_vector(7 downto 0);
     signal done : std_logic;
-    signal error_code : error_type;
+    signal error_code : std_logic_vector(3 downto 0);
 
 begin
 

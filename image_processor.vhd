@@ -46,10 +46,11 @@ entity image_processor is
           write_en_save : out std_logic; -- flags that a byte can be written to file
           data_out_save : out std_logic_vector(7 downto 0); -- byte that can be written to file
           done : out std_logic; -- finished processing
-          error_code : out error_type); -- errors encountered while processing
+          error_code : out std_logic_vector(3 downto 0)); -- errors encountered while processing
 end image_processor;
 
 architecture arch of image_processor is
+
 
     component image_processor_controller is
         port (clock : in std_logic; -- clock signal
@@ -59,7 +60,7 @@ architecture arch of image_processor is
               op_data_ready : in std_logic; -- flags that the data is ready to store in memory
               op_data_valid : in std_logic; -- flags that the data is valid [UNUSED]
               done_load : in std_logic; -- finished loading image from file
-              error_code_load : in error_type; -- io error encountered on load
+              error_code_load : in std_logic_vector(3 downto 0); -- io error encountered on load
               done_save : in std_logic; -- finished saving image to file
               address : in std_logic_vector(15 downto 0); -- address of current pixel to be stored in memory
               img_width : in std_logic_vector(7 downto 0); -- width of the image being processed
@@ -77,7 +78,7 @@ architecture arch of image_processor is
               address_ctrl : out std_logic_vector(1 downto 0); -- controls who gets to set the memory address (internal/file load/file save)
               save_en : out std_logic; -- enables the image save submodule
               done : out std_logic; -- finished processing
-              error_code : out error_type); -- errors encountered while processing
+              error_code : out std_logic_vector(3 downto 0)); -- errors encountered while processing
     end component;
 
     component sram is
@@ -116,7 +117,7 @@ architecture arch of image_processor is
               address : out std_logic_vector(15 downto 0); -- memory address to write pixel to
               pixel_data : out std_logic_vector(7 downto 0); -- pixel data to write to memory
               done : out std_logic; -- flag set when finished loading
-              error_code : out error_type); -- error encountered while parsing image file
+              error_code : out std_logic_vector(3 downto 0)); -- error encountered while parsing image file
     end component;
 
     component image_save is
@@ -166,7 +167,7 @@ architecture arch of image_processor is
     signal op_data_valid : std_logic;
 
     signal done_load : std_logic;
-    signal error_code_load : error_type;
+    signal error_code_load : std_logic_vector(3 downto 0);
 
     signal done_save : std_logic;
     signal save_en : std_logic;

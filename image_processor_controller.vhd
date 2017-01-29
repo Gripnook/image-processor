@@ -14,7 +14,7 @@ entity image_processor_controller is
           op_data_ready : in std_logic; -- flags that the data is ready to store in memory
           op_data_valid : in std_logic; -- flags that the data is valid [UNUSED]
           done_load : in std_logic; -- finished loading image from file
-          error_code_load : in error_type; -- io error encountered on load
+          error_code_load : in std_logic_vector(3 downto 0); -- io error encountered on load
           done_save : in std_logic; -- finished saving image to file
           address : in std_logic_vector(15 downto 0); -- address of current pixel to be stored in memory
           img_width : in std_logic_vector(7 downto 0); -- width of the image being processed
@@ -32,7 +32,7 @@ entity image_processor_controller is
           address_ctrl : out std_logic_vector(1 downto 0); -- controls who gets to set the memory address (internal/file load/file save)
           save_en : out std_logic; -- enables the image save submodule
           done : out std_logic; -- finished processing
-          error_code : out error_type); -- errors encountered while processing
+          error_code : out std_logic_vector(3 downto 0)); -- errors encountered while processing
 end image_processor_controller;
 
 architecture arch of image_processor_controller is

@@ -20,7 +20,7 @@ entity image_load is
           address : out std_logic_vector(15 downto 0); -- memory address to write pixel to
           pixel_data : out std_logic_vector(7 downto 0); -- pixel data to write to memory
           done : out std_logic; -- flag set when finished loading
-          error_code : out error_type); -- error encountered while parsing image file
+          error_code : out std_logic_vector(3 downto 0)); -- error encountered while parsing image file
 end image_load;
 
 architecture arch of image_load is
@@ -42,7 +42,7 @@ architecture arch of image_load is
               address_cnt_en : out std_logic; -- increments the address
               pixel_data_clr : out std_logic; -- clear the current pixel
               done : out std_logic; -- flag set when finished loading
-              error_code : out error_type); -- error encountered while parsing image file
+              error_code : out std_logic_vector(3 downto 0)); -- error encountered while parsing image file
     end component;
 
     signal data_index : std_logic_vector(1 downto 0);
