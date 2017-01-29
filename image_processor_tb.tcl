@@ -7,6 +7,7 @@ proc AddWaves {} {
     add wave -position end sim:/image_processor_tb/reg_in_1
     add wave -position end sim:/image_processor_tb/reg_out
     add wave -position end sim:/image_processor_tb/global_operand
+    add wave -position end sim:/image_processor_tb/address_increment
     add wave -position end sim:/image_processor_tb/operation
     add wave -position end sim:/image_processor_tb/data_in_load
     add wave -position end sim:/image_processor_tb/read_en_load

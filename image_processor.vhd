@@ -20,6 +20,9 @@
 -- register 11 is a proxy for the global operand. If it is selected for reg_in_1, the constant value
 -- global_operand is used in all operations.
 -- 
+-- Any internal operation can be performed shifted, where if k = address_increment,
+-- reg_out[i][j] = i+k < width ? OP(reg_in[i+k][j]) : OP(reg_in[width-1][j])
+-- 
 -- Note that after each operation, start must be reset and a minimum of two clock cycles are required
 -- for the processor to be ready for the next operation.
 
@@ -36,6 +39,7 @@ entity image_processor is
           reg_in_1 : in std_logic_vector(1 downto 0); -- second input register (sram0/sram1/sram2/global_operand)
           reg_out : in std_logic_vector(1 downto 0); -- output register (sram0/sram1/sram2)
           global_operand : in std_logic_vector(7 downto 0); -- global operand to use in operations with every pixel of an image
+          address_increment : in std_logic_vector(7 downto 0); -- perform shifted operations
           operation : in std_logic_vector(3 downto 0); -- operation to perform
           data_in_load : in std_logic_vector(7 downto 0); -- data being read from file
           read_en_load : in std_logic; -- indicates that there is still data to be read from file
@@ -134,9 +138,9 @@ architecture arch of image_processor is
 
     signal metadata_load_ctrl : std_logic;
     signal metadata_reg_en : std_logic;
-    signal img_width_0, img_width_1, img_width_sram_0, img_width_sram_1, img_width_sram_2, img_width_load, img_width_next : std_logic_vector(7 downto 0);
-    signal img_height_0, img_height_1, img_height_sram_0, img_height_sram_1, img_height_sram_2, img_height_load, img_height_next : std_logic_vector(7 downto 0);
-    signal maxval_0, maxval_1, maxval_sram_0, maxval_sram_1, maxval_sram_2, maxval_load, maxval_next : std_logic_vector(7 downto 0);
+    signal img_width, img_width_sram_0, img_width_sram_1, img_width_sram_2, img_width_load, img_width_next : std_logic_vector(7 downto 0);
+    signal img_height, img_height_sram_0, img_height_sram_1, img_height_sram_2, img_height_load, img_height_next : std_logic_vector(7 downto 0);
+    signal maxval, maxval_sram_0, maxval_sram_1, maxval_sram_2, maxval_load, maxval_next : std_logic_vector(7 downto 0);
 
     signal write_en, write_en_0, write_en_1, write_en_2, write_en_load, write_en_next : std_logic;
     signal data_write, data_write_load, data_write_next : std_logic_vector(7 downto 0);
@@ -147,7 +151,8 @@ architecture arch of image_processor is
     signal data_read_0, data_read_1 : std_logic_vector(7 downto 0);
     signal data_read_sram_0, data_read_sram_1, data_read_sram_2 : std_logic_vector(7 downto 0);
 
-    signal address, address_internal, address_save, address_load : std_logic_vector(15 downto 0);
+    signal address, address_internal, address_save, address_load, address_incremented : std_logic_vector(15 downto 0);
+    signal address_modulus : std_logic_vector(7 downto 0);
     signal address_cnt_en : std_logic;
     signal address_ctrl : std_logic_vector(1 downto 0);
 
@@ -182,8 +187,8 @@ begin
               error_code_load => error_code_load,
               done_save => done_save,
               address => address_internal,
-              img_width => img_width_0,
-              img_height => img_height_0,
+              img_width => img_width,
+              img_height => img_height,
               controller_reset => controller_reset,
               input_reg_en => input_reg_en,
               processor_en => processor_en,
@@ -223,16 +228,16 @@ begin
               data_in => data_write_next,
               data_out => data_read_sram_2);
 
-    metadata_load_process : process (metadata_load_ctrl, img_width_0, img_width_load, img_height_0, img_height_load, maxval_0, maxval_load)
+    metadata_load_process : process (metadata_load_ctrl, img_width, img_width_load, img_height, img_height_load, maxval, maxval_load)
     begin
         if (metadata_load_ctrl = '1') then
             img_width_next <= img_width_load;
             img_height_next <= img_height_load;
             maxval_next <= maxval_load;
         else
-            img_width_next <= img_width_0;
-            img_height_next <= img_height_0;
-            maxval_next <= maxval_0;
+            img_width_next <= img_width;
+            img_height_next <= img_height;
+            maxval_next <= maxval;
         end if;
     end process;
 
@@ -276,7 +281,7 @@ begin
               enable => processor_en,
               pixel_data => data_read_0,
               pixel_operand => data_read_1,
-              maxval => maxval_0,
+              maxval => maxval,
               operation => operation_internal,
               data_out => data_write,
               data_ready => op_data_ready,
@@ -300,9 +305,9 @@ begin
     port map (clock => clock,
               reset => reset_internal,
               save_en => save_en,
-              img_width => img_width_0,
-              img_height => img_height_0,
-              maxval => maxval_0,
+              img_width => img_width,
+              img_height => img_height,
+              maxval => maxval,
               pixel_data => data_read_0,
               write_en => write_en_save,
               data_out => data_out_save,
@@ -335,53 +340,32 @@ begin
         case reg_in_0_internal is
         when "00" =>
             data_read_0 <= data_read_sram_0;
-            img_width_0 <= img_width_sram_0;
-            img_height_0 <= img_height_sram_0;
-            maxval_0 <= maxval_sram_0;
+            img_width <= img_width_sram_0;
+            img_height <= img_height_sram_0;
+            maxval <= maxval_sram_0;
         when "01" =>
             data_read_0 <= data_read_sram_1;
-            img_width_0 <= img_width_sram_1;
-            img_height_0 <= img_height_sram_1;
-            maxval_0 <= maxval_sram_1;
+            img_width <= img_width_sram_1;
+            img_height <= img_height_sram_1;
+            maxval <= maxval_sram_1;
         when "10" =>
             data_read_0 <= data_read_sram_2;
-            img_width_0 <= img_width_sram_2;
-            img_height_0 <= img_height_sram_2;
-            maxval_0 <= maxval_sram_2;
+            img_width <= img_width_sram_2;
+            img_height <= img_height_sram_2;
+            maxval <= maxval_sram_2;
         when others =>
             data_read_0 <= (others => '0'); -- reg0 is not allowed to be a global operand
-            img_width_0 <= (others => '0');
-            img_height_0 <= (others => '0');
-            maxval_0 <= (others => '0');
+            img_width <= (others => '0');
+            img_height <= (others => '0');
+            maxval <= (others => '0');
         end case;
     end process;
 
-    reg_in_1_process : process (reg_in_1_internal, data_read_sram_0, data_read_sram_1, data_read_sram_2, global_operand_internal,
-        img_width_sram_0, img_width_sram_1, img_width_sram_2, img_height_sram_0, img_height_sram_1, img_height_sram_2, maxval_sram_0, maxval_sram_1, maxval_sram_2)
-    begin
-        case reg_in_1_internal is
-        when "00" =>
-            data_read_1 <= data_read_sram_0;
-            img_width_1 <= img_width_sram_0;
-            img_height_1 <= img_height_sram_0;
-            maxval_1 <= maxval_sram_0;
-        when "01" =>
-            data_read_1 <= data_read_sram_1;
-            img_width_1 <= img_width_sram_1;
-            img_height_1 <= img_height_sram_1;
-            maxval_1 <= maxval_sram_1;
-        when "10" =>
-            data_read_1 <= data_read_sram_2;
-            img_width_1 <= img_width_sram_2;
-            img_height_1 <= img_height_sram_2;
-            maxval_1 <= maxval_sram_2;
-        when others =>
-            data_read_1 <= global_operand_internal;
-            img_width_1 <= (others => '0');
-            img_height_1 <= (others => '0');
-            maxval_1 <= (others => '0');
-        end case;
-    end process;
+    with reg_in_1_internal select data_read_1 <=
+        data_read_sram_0 when "00",
+        data_read_sram_1 when "01",
+        data_read_sram_2 when "10",
+        global_operand_internal when others;
 
     with read_ctrl select read_en_next <=
         read_en_save when '1',
@@ -412,9 +396,15 @@ begin
     begin
         if (reset_internal = '1') then
             address_internal <= (others => '0');
+            address_modulus <= (others => '0');
         elsif (rising_edge(clock)) then
             if (address_cnt_en = '1') then
                 address_internal <= std_logic_vector(unsigned(address_internal) + 1);
+                if (unsigned(address_modulus) + 1 = unsigned(img_width)) then
+                    address_modulus <= (others => '0');
+                else
+                    address_modulus <= std_logic_vector(unsigned(address_modulus) + 1);
+                end if;
             end if;
         end if;
     end process;
@@ -422,6 +412,16 @@ begin
     with address_ctrl select address <=
         address_internal when "00",
         address_load when "01",
-        address_save when others;
+        address_save when "10",
+        address_incremented when others;
+
+    address_increment_process : process (address_internal, address_modulus, address_increment, img_width)
+    begin
+        if (unsigned(address_modulus) >= unsigned(img_width) - unsigned(address_increment)) then
+            address_incremented <= std_logic_vector(unsigned(address_internal) + unsigned(img_width) - unsigned(address_modulus) - 1);
+        else
+            address_incremented <= std_logic_vector(unsigned(address_internal) + unsigned(address_increment));        
+        end if;
+    end process;
 
 end architecture;

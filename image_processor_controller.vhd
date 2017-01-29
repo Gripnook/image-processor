@@ -46,6 +46,7 @@ begin
     begin
         if (reset = '1') then
             state <= A;
+            error_code <= NONE;
         elsif (rising_edge(clock)) then
             case state is
             when A =>
@@ -70,6 +71,9 @@ begin
                 end if;
             when D =>
                 if (done_load = '1') then
+                    if (error_code_load /= NONE) then
+                        error_code <= error_code_load;
+                    end if;
                     state <= H;
                 else
                     state <= D;
@@ -91,6 +95,7 @@ begin
             when H =>
                 if (start = '0') then
                     state <= A;
+                    error_code <= NONE;
                 else
                     state <= H;
                 end if;
@@ -99,7 +104,7 @@ begin
         end if;
     end process;
 
-    output_process : process (reset, start, operation, done_load, error_code_load, done_save, op_data_ready, op_data_valid,
+    output_process : process (reset, start, operation, done_load, done_save, op_data_ready, op_data_valid,
         address, img_width, img_height, state)
     begin
         if (reset = '1') then
@@ -116,7 +121,6 @@ begin
             address_ctrl <= "00";
             save_en <= '0';
             done <= '0';
-            error_code <= NONE;
         else
             controller_reset <= '0';
             input_reg_en <= '0';
@@ -130,6 +134,7 @@ begin
             address_cnt_en <= '0';
             address_ctrl <= "00";
             save_en <= '0';
+            done <= '0';
 
             case state is
             when A =>
@@ -156,13 +161,12 @@ begin
                 if (to_integer(unsigned(address)) = to_integer(unsigned(img_width)) * to_integer(unsigned(img_height))) then
                     done <= '1';
                 else
+                    address_ctrl <= "11";
                     read_en <= '1';
                 end if;
             when D =>
                 if (done_load = '1') then
-                    if (error_code_load /= NONE) then
-                        error_code <= error_code_load;
-                    end if;
+                    
                     done <= '1';
                 else
                     metadata_load_ctrl <= '1';
@@ -193,7 +197,8 @@ begin
                 if (start = '0') then
                     controller_reset <= '1';
                     done <= '0';
-                    error_code <= NONE;
+                else
+                    done <= '1';
                 end if;
             when others =>
                 null;
