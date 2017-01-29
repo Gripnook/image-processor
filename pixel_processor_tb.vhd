@@ -155,6 +155,13 @@ begin
         assert (data_out = x"06") report "output should be 6 but was " & integer'image(to_integer(unsigned(data_out))) severity error;
         assert (data_valid = '1') report "data should be valid but was not" severity error;
 
+        pixel_data <= x"04";
+        pixel_operand <= x"0A";
+        operation <= x"9";
+        wait for clock_period;
+        assert (data_out = x"04") report "output should be 4 but was " & integer'image(to_integer(unsigned(data_out))) severity error;
+        assert (data_valid = '1') report "data should be valid but was not" severity error;
+
         report "Done";
 
         wait;

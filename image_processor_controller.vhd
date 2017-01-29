@@ -56,9 +56,9 @@ begin
                     state <= A;
                 end if;
             when B =>
-                if (operation = "1001") then
+                if (operation = "1010") then
                     state <= D;
-                elsif (operation = "1010") then
+                elsif (operation = "1011") then
                     state <= E;
                 else
                     state <= C;

@@ -9,6 +9,7 @@
 -- 6: set output to maxval - pixel_data
 -- 7: set output to maxval if pixel_data > pixel_operand, otherwise output pixel_data
 -- 8: set output to abs(pixel_data - pixel_operand)
+-- 9: set output to (pixel_data - pixel_operand + maxval) / 2
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -87,6 +88,9 @@ begin
             else
                 data_out_internal <= std_logic_vector(unsigned(pixel_operand) - unsigned(pixel_data));
             end if;
+        when "1001" =>
+            data_out_next := std_logic_vector(unsigned("0" & pixel_data) - unsigned(pixel_operand) + unsigned(maxval));
+            data_out_internal <= data_out_next(8 downto 1);
         when others =>
             data_out_internal <= (others => '0');
         end case;

@@ -94,7 +94,7 @@ begin
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1001";
+        operation <= "1010";
         read_en_load <= '1';
         wait for clock_period;
 
@@ -127,7 +127,7 @@ begin
         reg_out <= "01";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1001";
+        operation <= "1010";
         read_en_load <= '1';
         wait for clock_period;
 
@@ -152,14 +152,14 @@ begin
         wait for clock_period;
         wait for clock_period;
 
-        -- reg0 <- reg0 - reg1
+        -- reg0 <- reg0 nsub reg1
         start <= '1';
         reg_in_0 <= "00";
         reg_in_1 <= "01";
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "0010";
+        operation <= "1001";
         wait until (done = '1');
         wait for clock_period/2; -- set data on falling edge
         start <= '0';
@@ -215,7 +215,7 @@ begin
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1010";
+        operation <= "1011";
         wait for clock_period;
 
         file_open(img_file, "processor_test_edge_detector.pgm", write_mode);

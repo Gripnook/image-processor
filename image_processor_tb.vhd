@@ -94,7 +94,7 @@ begin
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1001";
+        operation <= "1010";
         read_en_load <= '1';
         wait for clock_period;
 
@@ -127,7 +127,7 @@ begin
         reg_out <= "01";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1001";
+        operation <= "1010";
         read_en_load <= '1';
         wait for clock_period;
 
@@ -173,7 +173,7 @@ begin
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1010";
+        operation <= "1011";
         wait for clock_period;
 
         file_open(img_file, "processor_test_1.pgm", write_mode);
@@ -217,7 +217,7 @@ begin
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1010";
+        operation <= "1011";
         wait for clock_period;
 
         file_open(img_file, "processor_test_2.pgm", write_mode);
@@ -261,7 +261,7 @@ begin
         reg_out <= "00";
         global_operand <= (others => '0');
         address_increment <= (others => '0');
-        operation <= "1010";
+        operation <= "1011";
         wait for clock_period;
 
         file_open(img_file, "processor_test_3.pgm", write_mode);

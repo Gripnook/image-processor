@@ -74,7 +74,7 @@ A pin-out of the image save module is shown in Figure \ref{fig:image_save}. The 
 
 \subsection{Pixel Processor}
 
-Next, the basic unit of pixel processing was designed. In addition to the operations specified, the absolute difference operation was added in order to better implement an edge detection algorithm. In addition, it was decided that the addition and subtraction operations should threshold the results at maxval and 0 respectively, as these behaviors make more sense in the context of pixel manipulation. This implementation also makes all data output by the processor valid. A description of the supported operations is given in Table \ref{tab:pixel_operations}. The pin-out diagram is shown in Figure \ref{fig:pixel_processor}. The data inputs are placed on the pixel\_data and pixel\_operand signals, the operation placed on the operation signal and the image maxval placed on the maxval signal. On each rising clock edge, data\_out is set to the result if enable is set. The data\_ready flag indicates that the data can be stored back in memory, and is included for potential pipelining of more complex operations in the future. The data\_valid flag indicates if the data is a valid pixel or if an overflow error has occurred. Currently, both of these flags are not used since the module operates in a single clock cycle and the data is always valid.
+Next, the basic unit of pixel processing was designed. In addition to the operations specified, the absolute difference operation was added in order to better implement an edge detection algorithm. In addition, it was decided that the addition and subtraction operations should threshold the results at maxval and 0 respectively, as these behaviors make more sense in the context of pixel manipulation. This implementation also makes all data output by the processor valid. Finally, a third subtraction operation was added, called normalized subtraction. This operation adds maxval to the difference and divides the result by 2, giving a value in [0, maxval]. A description of the supported operations is given in Table \ref{tab:pixel_operations}. The pin-out diagram is shown in Figure \ref{fig:pixel_processor}. The data inputs are placed on the pixel\_data and pixel\_operand signals, the operation placed on the operation signal and the image maxval placed on the maxval signal. On each rising clock edge, data\_out is set to the result if enable is set. The data\_ready flag indicates that the data can be stored back in memory, and is included for potential pipelining of more complex operations in the future. The data\_valid flag indicates if the data is a valid pixel or if an overflow error has occurred. Currently, both of these flags are not used since the module operates in a single clock cycle and the data is always valid.
 
 \begin{figure}
     \centering
@@ -97,6 +97,7 @@ Next, the basic unit of pixel processing was designed. In addition to the operat
         INVERT & 0110 & Sets the output to maxval - pixel\_data. \\
         THRESH & 0111 & Sets the output to maxval if pixel\_data $>$ pixel\_operand, and to pixel\_data otherwise. \\
         ABSDIFF & 1000 & Outputs the absolute difference of pixel\_data and pixel\_operand. \\
+        NDIFF & 1001 & Outputs the normalized difference of pixel\_data and pixel\_operand. \\
     \end{tabular}
     \caption{Possible pixel operations performable by the pixel processor.}
     \label{tab:pixel_operations}
@@ -127,8 +128,9 @@ Finally, the image processor was designed using the modules defined previously. 
         INVERT & 0110 & reg\_out $\Leftarrow$ maxval - reg\_in\_0 \\
         THRESH & 0111 & reg\_out $\Leftarrow$ reg\_in\_0 $>$ reg\_in\_1 ? maxval : reg\_in\_0 \\
         ABSDIFF & 1000 & reg\_out $\Leftarrow$ abs(reg\_in\_0 - reg\_in\_1) \\
-        LOAD & 1001 & reg\_out $\Leftarrow$ file\_in \\
-        SAVE & 1010 & file\_out $\Leftarrow$ reg\_in\_0 \\
+        NDIFF & 1001 & reg\_out $\Leftarrow$ (reg\_in\_0 - reg\_in\_1 + maxval) / 2 \\
+        LOAD & 1010 & reg\_out $\Leftarrow$ file\_in \\
+        SAVE & 1011 & file\_out $\Leftarrow$ reg\_in\_0 \\
     \end{tabular}
     \caption{Possible image operations performable by the image processor.}
     \label{tab:image_operations}
@@ -136,7 +138,7 @@ Finally, the image processor was designed using the modules defined previously. 
 
 \subsection{Vertical Edge Detector}
 
-The vertical edge detector was implemented as a test-bench that makes use of the image processor described above. It loads the main file to be processed into reg0 and the background into reg1, takes the difference and shifts it by 1 and stores the result in reg1, then performs an absolute difference between the two and thresholds the result with a threshold of 7. Then, it saves the result to a separate file. With this sequence of operations, no normalization is needed since the absolute difference operation cannot overflow. In addition, the rightmost column keeps its value when the image is shifted left, so the gradient will always be 0 on that column.
+The vertical edge detector was implemented as a test-bench that makes use of the image processor described above. It loads the main file to be processed into reg0 and the background into reg1, takes the normalized difference, shifts it by 1 and stores the result in reg1, then performs an absolute difference between the two and thresholds the result with a threshold of 7. Then, it saves the result to a separate file. With this sequence of operations, no normalization is needed since the absolute difference operation cannot overflow. In addition, the rightmost column keeps its value when the image is shifted left, so the gradient will always be 0 on that column.
 
 \section{Simulation Results}
 

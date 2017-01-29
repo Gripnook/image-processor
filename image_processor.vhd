@@ -10,8 +10,9 @@
 -- 6: reg_out <- MAXVAL - reg_in_0
 -- 7: reg_out <- reg_in_0 > reg_in_1 ? MAXVAL : reg_in_0
 -- 8: reg_out <- abs(reg_in_0 - reg_in_1)
--- 9: reg_out <- file
--- 10: file <- reg_in_0
+-- 9: reg_out <- (reg_in_0 - reg_in_1 + maxval) / 2
+-- 10: reg_out <- file
+-- 11: file <- reg_in_0
 -- 
 -- reg_in_0 can be any of 00,01,10
 -- reg_in_1 can be any of 00,01,10,11
