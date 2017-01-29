@@ -5,7 +5,7 @@
 \usepackage{graphicx}
 
 \title{\textbf{ECSE-487 \\ COMPUTER ARCHITECTURE LABORATORY \\ Assignment \#1}}
-\author{Andrei Purcarus \\ 260631911}
+\author{Andrei Purcarus Craciun \\ 260631911}
 \date{January 30, 2017}
 
 \begin{document}
@@ -14,7 +14,7 @@
 
 \section{Introduction}
 
-This report describes the design, simulation and synthesis of an image processing module that can parse PGM ASCII images byte by byte, store them in an internal memory block, perform pixel by pixel operations on them, and save the resulting images to files byte by byte in the same format. The processor is then applied to simulate an edge detector on sample images to demonstrate proof of concept.
+This report describes the design, simulation and synthesis of an image processing module that can parse PGM ASCII images byte by byte, store them in an internal memory block, perform pixel by pixel operations on them, and save the resulting images to files byte by byte in the same format. It also describes an application of the module to edge detection in background-difference images.
 
 \section{Design Description}
 
@@ -24,7 +24,7 @@ First, a basic SRAM module was designed to store the pixels of the images being 
 
 A pin-out diagram of the component is shown in Figure \ref{fig:sram}. The component was made generic in terms of address width and data width in order to simplify reuse. The component is synchronized to the rising edge of the clock. To read data from the memory block, the address of the data is set, and the read\_en signal is asserted. On the next rising edge, the data will be available on the data\_out line. Similarly, to write data, the address to write to and the data\_in are set, and the write\_en signal is asserted. On the next rising edge, the data will be stored at the specified address. The processor system described in this report uses ADDR\_WIDTH = 16 and DATA\_WIDTH = 8 in order to satisfy the maximum image size described above.
 
-\begin{figure}
+\begin{figure}[htb]
     \centering
     \includegraphics[width=0.5\linewidth]{sram_entity.PNG}
     \caption{An SRAM module designed to store images.}
@@ -35,16 +35,16 @@ A pin-out diagram of the component is shown in Figure \ref{fig:sram}. The compon
 
 Next, the image IO modules were designed. In order to make these designs synthesizable, the actual file manipulation is left to the simulation test-benches. The load module assumes that a continuous byte input stream is available as input, and writes its data to an SRAM block as defined in the previous section. The save module assumes that its input is available in an SRAM block and that its output will be written to file when it asserts a signal.
 
-A pin-out of the image load module is shown in Figure \ref{fig:image_load}. The design uses a datapath/controller system to parse a PGM image file. The data is fed continuously into the input on each rising clock edge, and the load\_en flag is asserted for as long as there is data available in the file. The module checks that the file satisfies the PGM image format as it loads data, and outputs an error code if it detects a violation. The possible error codes are described in Table \ref{tab:io_error}, and are defined in the image\_io\_error package. The pixel data is gradually output as the file is parsed, with the address and write\_en lines designed to store the data contiguously in an SRAM block. When the done flag is asserted, the img\_width, img\_height and maxval signals will contain the correct values assuming no errors, and the data will have been written to memory. The module then needs to be reset through the asynchronous reset flag to be able to parse another file. Internally, the module discards non-numeric data and comments and stores numeric data in a register, incrementing it as more digits are read before writing it to memory when a whitespace character is reached.
+A pin-out of the image load module is shown in Figure \ref{fig:image_load}. The design uses a datapath/controller system to parse a PGM image file. The data is fed continuously into data\_in on each rising clock edge, and the load\_en flag is asserted for as long as there is data available in the file. The module checks that the file satisfies the PGM image format as it loads data, and outputs an error code if it detects a violation. The possible error codes are described in Table \ref{tab:io_error}, and are defined in the image\_io\_error package. The pixel data is gradually output as the file is parsed, with the address and write\_en lines designed to store the data contiguously in an SRAM block. When the done flag is asserted, the img\_width, img\_height and maxval signals will contain the correct values assuming no errors, and the data will have been written to memory. The module then needs to be reset through the asynchronous reset flag to be able to parse another file. Internally, the module discards non-numeric data and comments and stores numeric data in a register, incrementing it as more digits are read before writing it to memory when a whitespace character is reached.
 
-\begin{figure}
+\begin{figure}[htb]
     \centering
     \includegraphics[width=0.5\linewidth]{image_load_entity.PNG}
     \caption{A module that loads PGM images from files into memory.}
     \label{fig:image_load}
 \end{figure}
 
-\begin{table}
+\begin{table}[htb]
     \centering
     \begin{tabular}[c]{ l | c | p{8cm} }
         \textbf{Error Name} & \textbf{Error Code} & \textbf{Description} \\
@@ -63,9 +63,9 @@ A pin-out of the image load module is shown in Figure \ref{fig:image_load}. The 
     \label{tab:io_error}
 \end{table}
 
-A pin-out of the image save module is shown in Figure \ref{fig:image_save}. The design also uses a datapath/controller system to output a PGM image to a file byte by byte. The img\_width, img\_height and maxval inputs are used to read in the image metadata, and the read\_en and address outputs are used to interface with an SRAM memory block and obtain the pixel\_data input. The module is enabled by the save\_en flag, and is reset with the asynchronous reset input. On each rising clock edge, the module can output an ASCII character on the data\_out line. It indicates that the character should be saved to a file through the write\_en flag. Finally, the done flag is used to indicate that the module has finished outputting all the data. Internally, the component stores the input data into a register. It then uses a binary to BCD conversion circuit and outputs each digit of the data on separate clock cycles after converting it to ASCII.
+A pin-out of the image save module is shown in Figure \ref{fig:image_save}. The design also uses a datapath/controller system to output a PGM image to a file byte by byte. The img\_width, img\_height and maxval inputs are used to read in the image metadata, and the read\_en and address outputs are used to interface with an SRAM memory block and obtain the pixel\_data input. The module is enabled by the save\_en flag, and is reset with the asynchronous reset input. On each rising clock edge, the module can output an ASCII character on the data\_out line. It indicates that the character should be saved to a file through the write\_en flag. Finally, the done flag is used to indicate that the module has finished outputting all the data. Internally, the component stores the input data into a register. It then uses a binary to BCD (Binary-Coded Decimal) conversion circuit and outputs each digit of the data on separate clock cycles after converting it to ASCII.
 
-\begin{figure}
+\begin{figure}[htb]
     \centering
     \includegraphics[width=0.5\linewidth]{image_save_entity.PNG}
     \caption{A module that saves PGM images from memory into files.}
@@ -76,14 +76,14 @@ A pin-out of the image save module is shown in Figure \ref{fig:image_save}. The 
 
 Next, the basic unit of pixel processing was designed. In addition to the operations specified, the absolute difference operation was added in order to better implement an edge detection algorithm. In addition, it was decided that the addition and subtraction operations should threshold the results at maxval and 0 respectively, as these behaviors make more sense in the context of pixel manipulation. This implementation also makes all data output by the processor valid. Finally, a third subtraction operation was added, called normalized subtraction. This operation adds maxval to the difference and divides the result by 2, giving a value in [0, maxval]. A description of the supported operations is given in Table \ref{tab:pixel_operations}. The pin-out diagram is shown in Figure \ref{fig:pixel_processor}. The data inputs are placed on the pixel\_data and pixel\_operand signals, the operation placed on the operation signal and the image maxval placed on the maxval signal. On each rising clock edge, data\_out is set to the result if enable is set. The data\_ready flag indicates that the data can be stored back in memory, and is included for potential pipelining of more complex operations in the future. The data\_valid flag indicates if the data is a valid pixel or if an overflow error has occurred. Currently, both of these flags are not used since the module operates in a single clock cycle and the data is always valid.
 
-\begin{figure}
+\begin{figure}[htb]
     \centering
     \includegraphics[width=0.5\linewidth]{pixel_processor_entity.PNG}
-    \caption{A basic processing unit capable of performing pixel by pixel operations.}
+    \caption{A basic processing unit capable of performing pixel operations.}
     \label{fig:pixel_processor}
 \end{figure}
 
-\begin{table}
+\begin{table}[htb]
     \centering
     \begin{tabular}[c]{ l | c | p{10.5cm} }
         \textbf{Op Name} & \textbf{Op Code} & \textbf{Description} \\
@@ -105,16 +105,16 @@ Next, the basic unit of pixel processing was designed. In addition to the operat
 
 \subsection{Image Processor}
 
-Finally, the image processor was designed using the modules defined previously. The pin-out diagram is shown in Figure \ref{fig:image_processor}. The processor was designed to be able to perform general purpose operations on images stored in 3 SRAM registers. The instruction to execute is specified by the reg\_in\_0, reg\_in\_1, reg\_out, global\_operand, address\_increment and operation signals. The types of operations are described in Table \ref{tab:image_operations}. The registers can be any of 00, 01 or 10, and the reg\_in\_1 input can take the special value 11 which indicated that the value of global\_operand should be used for all pixels in the register. The address\_increment input allows for horizontal left shifting of operation results, with the right-most columns being padded with the last value in each row. The module also includes the data\_in\_load and read\_en\_load inputs to provide an interface with the image load module, and the data\_out\_save and write\_en\_save outputs to provide an interface with the image save module. Finally, the done and error\_code signals specify the state of the processor, with the error codes being the same as those for the image load module.
+Finally, the image processor was designed using the modules defined previously. The pin-out diagram is shown in Figure \ref{fig:image_processor}. The processor was designed to be able to perform general purpose operations on images stored in 3 SRAM registers. The instruction to execute is specified by the reg\_in\_0, reg\_in\_1, reg\_out, global\_operand, address\_increment and operation signals. The types of operations are described in Table \ref{tab:image_operations}. The registers can be any of 00, 01 or 10, and the reg\_in\_1 input can take the special value 11 which indicates that the value of global\_operand should be used for all pixels in the register. The address\_increment input allows for horizontal left shifting of operation results, with the right-most columns being padded with the last value in each row. The module also includes the data\_in\_load and read\_en\_load inputs to provide an interface with the image load module, and the data\_out\_save and write\_en\_save outputs to provide an interface with the image save module. Finally, the done and error\_code signals specify the state of the processor, with the error codes being the same as those for the image load module.
 
-\begin{figure}
+\begin{figure}[htb]
     \centering
     \includegraphics[width=0.5\linewidth]{image_processor_entity.PNG}
     \caption{A processing unit capable of performing pixel by pixel operations on images.}
     \label{fig:image_processor}
 \end{figure}
 
-\begin{table}
+\begin{table}[htb]
     \centering
     \begin{tabular}[c]{ l | c | p{10cm} }
         \textbf{Op Name} & \textbf{Op Code} & \textbf{Description} \\
@@ -138,22 +138,141 @@ Finally, the image processor was designed using the modules defined previously. 
 
 \subsection{Vertical Edge Detector}
 
-The vertical edge detector was implemented as a test-bench that makes use of the image processor described above. It loads the main file to be processed into reg0 and the background into reg1, takes the normalized difference, shifts it by 1 and stores the result in reg1, then performs an absolute difference between the two and thresholds the result with a threshold of 7. Then, it saves the result to a separate file. With this sequence of operations, no normalization is needed since the absolute difference operation cannot overflow. In addition, the rightmost column keeps its value when the image is shifted left, so the gradient will always be 0 on that column.
+The vertical edge detector was implemented as a test-bench that makes use of the image processor described above. The sequence of operations is described in register transfer language in Table \ref{tab:edge_detect_ops}. First, it loads the main file to be processed into reg0 and the background into reg1, and takes the normalized difference and stores it in reg0. It then shifts it by 1 and stores the result in reg1, and performs an absolute difference between reg0 and reg1 and thresholds the result with a threshold of 7. Then, it saves the result to a separate file. With this sequence of operations, normalization is taken care of by the normalized difference and absolute difference operations. In addition, the rightmost column keeps its value when the image is shifted left, so the gradient will always be 0 on that column.
+
+\begin{table}[htb]
+    \centering
+    \begin{tabular}[c]{ r c l }
+        reg0&$\Leftarrow$&file\_main \\
+        reg1&$\Leftarrow$&file\_background \\
+        reg0&$\Leftarrow$&reg0 NDIFF reg1 \\
+        reg1&$\Leftarrow$&SET reg0, address\_increment = 1 \# shift reg0 by 1 \\
+        reg2&$\Leftarrow$&reg0 ABSDIFF reg1 \\
+        reg0&$\Leftarrow$&reg2 THRESH 7 \\
+        file\_out&$\Leftarrow$&reg0 \\
+    \end{tabular}
+    \caption{Operations executed in the edge detection algorithm.}
+    \label{tab:edge_detect_ops}
+\end{table}
 
 \section{Simulation Results}
 
-% read/write image files...
-% pixel operations
-% SUB, XOR, THRES images
-% EDGE DETECTOR -> improvement in algorithm would require vertical gradients -> would need a separate implementation
+Every subunit of the design was subjected to individual testing before being incorporated into the larger processor unit. Automated tests were used to test reading and writing to an SRAM block, to test every possible operation and special case for the pixel processor, to test file loading with every possible type of error, and to test saving a small sample file. Annotated simulation traces for a selection of these tests can be found in Figures \ref{fig:pixel_operations_sim_1}, \ref{fig:pixel_operations_sim_2}, and \ref{fig:image_load_sim} in Appendix \ref{sec:sim_traces}. These tests can be found in the source code and run using the .tcl scripts. The automated tests all pass.
 
-% decribe full test methodology
-% describe all testbenches
+Then, the processor unit itself was tested by loading the people106.pgm and background.pgm files into memory and performing the NDIFF, XOR, and THRESH 128 operations on them, and saving each result to file. An annotated simulation trace can be found in Figure \ref{fig:image_operations_sim} in Appendix \ref{sec:sim_traces}. The resulting images can be found in Appendix \ref{sec:images}, in Figures \ref{fig:ndiff_image}, \ref{fig:xor_image} and \ref{fig:thresh_image}, with the originals available in Figures \ref{fig:people106_image} and \ref{fig:background_image}. It is clear that these operations are performed as expected, as the NDIFF successfully removes the background image, the XOR brightens up the people where the pixels are different to the background and darkens the background, and the THRESH sets the brighter parts of the people image to 255.
+
+Finally, the annotated simulation results for the edge detector test-bench are available in Figure \ref{fig:edge_detect_sim} in Appendix \ref{sec:sim_traces}, with the resulting image shown in Figure \ref{fig:edge_detect_image} in Appendix \ref{sec:images}. The edges of the image have clearly been identified. From these test results, it is clear that the processor unit functions as intended.
 
 \section{Synthesis Results}
 
-FPGA: Cyclone V 5CSEMA5F31C6N
-% set clock to 100MHz and check critical path
-% However, max clock rate is 50MHz anyway so it doesn't matter for this FPGA
+The processor component was synthesized on a Cyclone V 5CSEMA5F31C6 FPGA. This FPGA was chosen due to previous experience with it in ECSE-323. The clock rate was set to 50MHz, the maximum clock rate on the device. The results are shown in Table \ref{tab:synthesis_results}. The table shows that the processor could be synthesized with the available resources on the device, and that the timing requirements are met.
+
+\begin{table}[htb]
+    \centering
+    \begin{tabular}[c]{ l | l }
+        \textbf{Family} & Cyclone V \\
+        \textbf{Device} & 5CSEMA5F31C6 \\
+        \textbf{Logic Utilization} & 439 / 32,070 (1 \%) \\
+        \textbf{Total Registers} & 262 \\
+        \textbf{Total Block Memory Bits} & 1,572,864 / 4,065,280 (39 \%) \\
+        \textbf{Total DSP Blocks} & 3 / 87 (3 \%) \\
+        \textbf{Fmax (MHz)} & 66.73 \\
+        \textbf{Setup Slack (ns)} & 5.015 \\
+        \textbf{Hold Slack (ns)} & 0.172 \\
+    \end{tabular}
+    \caption{Synthesis results on the Cyclone V 5CSEMA5F31C6 FPGA.}
+    \label{tab:synthesis_results}
+\end{table}
+
+The part of the design taking up the most space are the memory blocks. The rest of the processor is quite small, taking up only 262 registers and 1 \% of the available logic blocks. In order to make this part of the design smaller, as well as be able to handle larger images, an external DRAM chip can be used, with the internal SRAM blocks serving as a cache. This would reduce the memory block requirement on the FPGA.
+
+The critical path in the circuit was found to be the BCD conversion function in the image save module. This function attempts to produce a 3-digit BCD number in a single clock cycle, which implies a large propagation delay. Synthesis of the (incorrect) design where the function is replaced by a no-op shows that Fmax increases to 119.2 MHz, a significant improvement. To fix this properly, the function could be implemented over several clock cycles, with the image load state machine modified to take this into account. This would potentially increase the latency of the image load circuit, but would decrease it for all the other components. Since saving an image file is a rare operation, this would amount to making the common case faster and thus speeding up the processor as a whole. Finally, the processor could be made much faster by redesigning it to exploit parallelism in the form of pipelining and data-level parallelism. The processor could then operate on multiple pixels simultaneously and deliver results faster.
+
+\clearpage
+
+\appendix
+
+\section{Simulation Traces} \label{sec:sim_traces}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{pixel_ops_sim_1.png}
+    \caption{Simulation showing correct operation of the SET, ADD and SUB operations of the pixel processor.}
+    \label{fig:pixel_operations_sim_1}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{pixel_ops_sim_3.png}
+    \caption{Simulation showing correct operation of the THRESH, ABSDIFF and NDIFF operations of the pixel processor.}
+    \label{fig:pixel_operations_sim_2}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{image_load_errors_sim.png}
+    \caption{Simulation showing correct error identification when loading an image.}
+    \label{fig:image_load_sim}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{image_processor_sim.png}
+    \caption{Simulation showing correct operation of the LOAD, NDIFF, XOR, THRESH and SAVE operations of the image processor.}
+    \label{fig:image_operations_sim}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.8\linewidth]{edge_detect_sim.png}
+    \caption{Simulation showing the correct generation of the edge detection image through the LOAD, NDIFF, SET, ABSDIFF, THRESH and SAVE operations of the image processor.}
+    \label{fig:edge_detect_sim}
+\end{figure}
+
+\clearpage
+
+\section{Images} \label{sec:images}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\linewidth]{people106.png}
+    \caption{Image of people provided for testing.}
+    \label{fig:people106_image}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\linewidth]{background.png}
+    \caption{Image of background provided for testing.}
+    \label{fig:background_image}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\linewidth]{processor_test_ndiff.png}
+    \caption{NDIFF of Figures \ref{fig:people106_image} and \ref{fig:background_image}. Note the gray background resulting from normalization and the clear identification of the people in the picture.}
+    \label{fig:ndiff_image}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\linewidth]{processor_test_xor.png}
+    \caption{XOR of Figures \ref{fig:people106_image} and \ref{fig:background_image}. Note that in general, the differences are set to white (1) and the similarities are set to black (0).}
+    \label{fig:xor_image}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\linewidth]{processor_test_thresh_128.png}
+    \caption{THRESH 128 of Figure \ref{fig:people106_image}. Note that the brighter parts of the image have been set to MAXVAL (255).}
+    \label{fig:thresh_image}
+\end{figure}
+
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.45\linewidth]{processor_test_edge_detector.png}
+    \caption{Result of edge detection algorithm performed on Figures \ref{fig:people106_image} and \ref{fig:background_image}. Note the correct identification of the edges of the people in the picture.}
+    \label{fig:edge_detect_image}
+\end{figure}
 
 \end{document}
