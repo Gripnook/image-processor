@@ -136,7 +136,7 @@ Finally, the image processor was designed using the modules defined previously. 
 
 \subsection{Vertical Edge Detector}
 
-The vertical edge detector was implemented as a test-bench that makes use of the image processor described above. It loads the image file to be processed into reg0, shifts the image by 1 and stores the result in reg1, then performs an absolute difference between the two and thresholds the result, with a threshold of 15. Then, it saves the result to a separate file. The details can be found in the file image\_edge\_detector\_tb.vhd.
+The vertical edge detector was implemented as a test-bench that makes use of the image processor described above. It loads the main file to be processed into reg0 and the background into reg1, takes the difference and shifts it by 1 and stores the result in reg1, then performs an absolute difference between the two and thresholds the result with a threshold of 7. Then, it saves the result to a separate file. With this sequence of operations, no normalization is needed since the absolute difference operation cannot overflow. In addition, the rightmost column keeps its value when the image is shifted left, so the gradient will always be 0 on that column.
 
 \section{Simulation Results}
 

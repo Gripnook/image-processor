@@ -87,7 +87,7 @@ begin
         reset <= '0';
 
         -- load file 1 into reg0
-        file_open(img_file, "PurcarusAndrei.pgm", read_mode);
+        file_open(img_file, "people106.pgm", read_mode);
         start <= '1';
         reg_in_0 <= "00";
         reg_in_1 <= "00";
@@ -113,6 +113,53 @@ begin
         end loop;
         read_en_load <= '0';
         file_close(img_file);
+        wait until (done = '1');
+        wait for clock_period/2; -- set data on falling edge
+        start <= '0';
+        wait for clock_period;
+        wait for clock_period;
+        
+        -- load file 2 into reg1
+        file_open(img_file, "background.pgm", read_mode);
+        start <= '1';
+        reg_in_0 <= "00";
+        reg_in_1 <= "00";
+        reg_out <= "01";
+        global_operand <= (others => '0');
+        address_increment <= (others => '0');
+        operation <= "1001";
+        read_en_load <= '1';
+        wait for clock_period;
+
+        while (not endfile(img_file)) loop
+            readline(img_file, img_line);
+            read_byte := true;
+            while (read_byte) loop
+                read(img_line, img_byte, read_byte);
+                if (read_byte) then
+                    data_in_load <= std_logic_vector(to_unsigned(character'pos(img_byte), 8));
+                else
+                    data_in_load <= ASCII_LF;
+                end if;
+                wait for clock_period;
+            end loop;
+        end loop;
+        read_en_load <= '0';
+        file_close(img_file);
+        wait until (done = '1');
+        wait for clock_period/2; -- set data on falling edge
+        start <= '0';
+        wait for clock_period;
+        wait for clock_period;
+
+        -- reg0 <- reg0 - reg1
+        start <= '1';
+        reg_in_0 <= "00";
+        reg_in_1 <= "01";
+        reg_out <= "00";
+        global_operand <= (others => '0');
+        address_increment <= (others => '0');
+        operation <= "0010";
         wait until (done = '1');
         wait for clock_period/2; -- set data on falling edge
         start <= '0';
@@ -147,12 +194,12 @@ begin
         wait for clock_period;
         wait for clock_period;
 
-        -- reg0 <- reg2 threshold 15
+        -- reg0 <- reg2 threshold 7
         start <= '1';
         reg_in_0 <= "10";
         reg_in_1 <= "11";
         reg_out <= "00";
-        global_operand <= x"0F";
+        global_operand <= x"07";
         address_increment <= (others => '0');
         operation <= "0111";
         wait until (done = '1');
