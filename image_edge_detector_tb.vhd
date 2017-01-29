@@ -152,7 +152,7 @@ begin
         wait for clock_period;
         wait for clock_period;
 
-        -- reg0 <- reg0 nsub reg1
+        -- reg0 <- reg0 ndiff reg1
         start <= '1';
         reg_in_0 <= "00";
         reg_in_1 <= "01";

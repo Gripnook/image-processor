@@ -3,6 +3,7 @@ proc AddWaves {} {
     add wave -position end sim:/pixel_processor_tb/clock
     add wave -position end sim:/pixel_processor_tb/pixel_data
     add wave -position end sim:/pixel_processor_tb/pixel_operand
+    add wave -position end sim:/pixel_processor_tb/maxval
     add wave -position end sim:/pixel_processor_tb/operation
     add wave -position end sim:/pixel_processor_tb/data_out
     add wave -position end sim:/pixel_processor_tb/data_valid

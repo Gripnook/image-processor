@@ -145,12 +145,12 @@ begin
                     controller_reset <= '1';
                 end if;
             when B =>
-                if (operation = "1001") then
+                if (operation = "1010") then
                     metadata_load_ctrl <= '1';
                     metadata_reg_en <= '1';
                     write_ctrl <= '1';
                     address_ctrl <= "01";
-                elsif (operation = "1010") then
+                elsif (operation = "1011") then
                     read_ctrl <= '1';
                     address_ctrl <= "10";
                     save_en <= '1';
