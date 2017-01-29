@@ -129,6 +129,7 @@ begin
     data_reg_input_process : process (data_in, data_index, img_width_internal, img_height_internal, maxval_internal, pixel_data_internal)
         variable feedback_signal : std_logic_vector(11 downto 0);
     begin
+        feedback_signal := (others => '0');
         if (data_index = "00") then
             feedback_signal := img_width_internal;
         elsif (data_index = "01") then

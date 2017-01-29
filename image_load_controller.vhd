@@ -195,7 +195,7 @@ begin
         end if;
     end process;
 
-    output_process : process (reset, load_en, data_in, data_index, state)
+    output_process : process (reset, load_en, data_in, data_index, address, img_width, img_height, state)
     begin
         if (reset = '1') then
             write_en <= '0';
@@ -204,13 +204,12 @@ begin
             address_cnt_en <= '0';
             pixel_data_clr <= '0';
         else
+            write_en <= '0';
+            data_index_cnt_en <= '0';
+            data_en <= '0';
+            address_cnt_en <= '0';
+            pixel_data_clr <= '0';
             if (load_en = '1') then
-                write_en <= '0';
-                data_index_cnt_en <= '0';
-                data_en <= '0';
-                address_cnt_en <= '0';
-                pixel_data_clr <= '0';
-
                 case state is
                 when E =>
                     if (unsigned(data_in) >= unsigned(ASCII_0) and (unsigned(data_in) <= unsigned(ASCII_9))) then

@@ -100,6 +100,7 @@ begin
             address_cnt_en <= '0';
             write_en <= '0';
             read_en <= '0';
+            done <= '0';
             case state is
             when A =>
                 data_out_ctrl <= "001";
@@ -153,6 +154,8 @@ begin
                     bcd_index_cnt_en <= '1';
                     write_en <= '1';
                 end if;
+            when H =>
+                done <= '1';
             when others =>
                 null;
             end case;
