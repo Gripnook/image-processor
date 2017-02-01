@@ -1,2 +1,3 @@
 # ECSE487-W17-A1
-Image Processing Module
+ Image processing module designed for ECSE-487 Computer Architecture Lab
+ 
